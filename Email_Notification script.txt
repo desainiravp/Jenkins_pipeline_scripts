@@ -1,0 +1,245 @@
+================================================================================
+Test Email Configuration
+================================================================================
+pipeline {
+    agent any
+     
+    stages {
+        stage('Ok') {
+            steps {
+                echo "Ok"
+            }
+        }
+    }
+    post {
+        always {
+            emailext body: 'A Test EMail', recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: 'Test'
+        }
+    }
+}
+
+=================================================================================
+Sample test email
+=================================================================================
+pipeline {
+    agent any
+    stages{
+        stage("git clone"){
+            steps{
+                git 'https://github.com/HARIDARUKUMALLI/java-tomcat-maven-example.git'
+            }
+        }
+        stage("Build"){
+            steps{
+                sh 'mvn clean install'
+            }
+        }
+		
+    }
+	post {
+			always {
+				emailext body: 'A Test EMail', recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: 'Test'
+			}
+		}
+
+}
+
+==================================================================================
+On SuccessFull Email Notification
+================================================================================
+pipeline {
+    agent any
+    stages{
+        stage("git clone"){
+            steps{
+                git 'https://github.com/HARIDARUKUMALLI/java-tomcat-maven-example.git'
+            }
+        }
+        stage("Build"){
+            steps{
+                sh 'mvn clean install'
+            }
+        }
+		
+    }
+	post {
+			success {
+				emailext body: 'Build is successfull', recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+		}
+
+}
+==========================================================================================================
+On successfull Email notification With failure and success along with Build numbers
+==========================================================================================================
+
+pipeline {
+    agent any
+    stages{
+        stage("git clone"){
+            steps{
+                git 'https://github.com/HARIDARUKUMALLI/java-tomcat-maven-example.git'
+            }
+        }
+        stage("Build"){
+            steps{
+                sh 'mvn clean install'
+            }
+        }
+		
+    }
+	post {
+			success {
+				emailext body: """<p>Build is SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+								<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""", 
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+				subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+			failure {
+			emailext body: """<p>Build is Failure: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+								<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""", 
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+				subject: "Failure Build: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+		}
+
+}
+
+
+=======================================================================================
+Notification mail for before build start
+=======================================================================================
+
+pipeline {
+    agent any
+    stages{
+		stage("Email notification for Build start"){
+			steps{
+				emailext (
+				subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+				body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+						<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+				)
+			}
+		}
+        stage("git clone"){
+            steps{
+                git 'https://github.com/HARIDARUKUMALLI/java-tomcat-maven-example.git'
+            }
+        }
+        stage("Build"){
+            steps{
+                sh 'mvn clean install'
+            }
+        }
+		
+    }
+	post {
+			success {
+				emailext body: """<p>Build is SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+								<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""", 
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+				subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+			failure {
+			emailext body: """<p>Build is Failure: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+								<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""", 
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+				subject: "Failure Build: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+		}
+
+}
+====================================================================================
+Approval mail and approval message on UI
+====================================================================================
+pipeline {
+    agent any
+    stages{
+		stage("Email notification for Build start"){
+			steps{
+				emailext (
+				subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+				body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+						<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+				)
+			}
+		}
+        stage("git clone"){
+            steps{
+                git 'https://github.com/HARIDARUKUMALLI/java-tomcat-maven-example.git'
+            }
+        }
+        stage("Build"){
+            steps{
+                timeout (time: 5, unit:'DAYS'){
+                    input message: 'Approve PRODUCTION Deployment?'
+                }
+                sh 'mvn clean install'
+            }
+        }
+		
+    }
+	post {
+			success {
+				emailext body: """<p>Build is SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+								<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""", 
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+				subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+			failure {
+			emailext body: """<p>Build is Failure: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+								<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""", 
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+				subject: "Failure Build: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+		}
+
+}
+
+
+
+https://www.jenkins.io/blog/2016/07/18/pipeline-notifications/
+https://www.edureka.co/blog/email-notification-in-jenkins/
+https://www.jenkins.io/blog/2017/02/15/declarative-notifications/
+
+
+====================================================================================
+Execute pipeline into slave node 
+====================================================================================
+pipeline {
+    agent { label "jenkins_slave1" }
+    stages{
+        stage("git clone"){
+            steps{
+                git 'https://github.com/HARIDARUKUMALLI/java-tomcat-maven-example.git'
+            }
+        }
+        stage("Build"){
+            steps{
+                sh 'mvn clean install'
+            }
+        }
+		
+    }
+	post {
+			success {
+				emailext body: """<p>Build is SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+								<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""", 
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+				subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+			failure {
+			emailext body: """<p>Build is Failure: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+								<p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""", 
+				recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+				subject: "Failure Build: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+			}
+		}
+
+}
+
+
+
