@@ -1,0 +1,387 @@
+
+d3a9d372bc86475500ab8ff5f3ce2b435da4cc42
+
+SonarQube Integration:
+==========================
+Manage jenkins:
+go to plugins 
+install mavn and sonarqube plugins 
+Go to global tool configuration
+set JDK
+uncheck java install automatically
+name as JAVA_HOME
+JAVA_HOME as (path of java) /usr/lib/jvm/java-11-openjdk-amd64
+
+Go to Sonarscanner
+name as SONAR_SCANNER
+
+Go to Maven
+name as MAVEN_HOME
+
+Goto manage jenkins 
+go to configure system
+go to SonarQube servers
+check Environment variables
+Add name ae SONARSERVER 
+server URL as IP address of server 172.31.41.201
+server token authentication 
+click on add 
+If it is not working
+Goto manage jenkins
+manage credentials
+click on system
+click on global credentials
+Add credentials
+Kind as secret text
+Get sonar secret:
+go to sonarqube web page
+http://13.235.23.174:9000/projects
+click on administartor'
+click on my account
+there provide key name
+it will provide secret key
+
+Again go to configre systen 
+add sonar credentials
+
+
+Insatll Tomacat:
+===================
+install tomcat 9
+https://linuxhint.com/install_apache_tomcat_server_ubuntu_2204/
+change port
+/etc/tomcat9/server.xml
+change the port
+sudo systemctl restart tomcat9
+
+Add login credentials:
+/etc/tomcat9/tomcat_users.xml
+Erase old data and add below data
+
+<tomcat-users>
+
+
+  <role rolename="manager-script"/>
+  <role rolename="admin-gui"/>
+  <role rolename="manager-gui"/>
+  <user username="admin" password="Admin@123" roles="manager-script,admin-gui,manager-gui"/>
+</tomcat-users>
+
+
+deploy folder
+/var/lib/tomcat9/webapps/copy the war folder here
+
+
+
+UPstream and Downstream:
+=========================
+1. Go to Manage plugins
+2. Download and install without restart "Build pipeline"
+3. Go to Dash board
+4. Click on + symbol
+5. select build pipeline & Provide name
+6. Go to upstream project 
+7. select which project run first (packet_servelet_project)
+8. Click apply and OK.
+9. Go to packet servlet project
+10. Go to post build action
+11. select build other projects
+12. select dependent project (deploy_servlet_project)
+13. run the fist project automatically other project start
+
+
+Parallell builds:
+===================
+1. 3. Go to Dash board
+4. Click on + symbol
+5. select build pipeline & Provide name
+6. Go to upstream project 
+7. select which project run first (packet_servelet_project)
+8. Click apply and OK.
+9. Go to packet servlet project
+10. Go to post build action
+11. select build other projects
+12. select dependent project (deploy_servlet_project) , add other projects also
+13. run the fist project automatically other project start
+
+
+
+Pipelines:
+1. Declartive pipeline
+Syntax:
+Declarative Pipeline:
+pipeline {
+	agent client 1/any
+	stages{
+		stage("label"){
+			steps{
+				//command to execute
+			}
+		}
+	}
+}	
+
+2. Scripted pipeline
+
+
+
+
+Email Notifications:
+=======================
+1. Extended email notification
+2. e-mail notification
+
+Install plugin:
+1. Go to mangae jenkins
+2. manage jenkins
+3. search for "Email Extension Template Plugin"
+4. Install without restart
+Configure:
+1. Mangae jenkins
+2. configure system
+3. go to "E-mail Notification" section
+4. provide smtp server name "smtp.gmail.com" (Provide organization smtp server name or Ip address)
+5. Go to advanced section
+6. check the "Enable SMTP Authentication" and "Use SSL"
+7. In Enable SMTP Authentication
+	1. proviode user name as mail id: srini.devops278@gmail.com
+	2. Password : *******
+	3. Gmail SMTP port "465"
+	4. REply to address "To whom receive the mail id": "srini.devops278@gmail.com"
+	5.  IN Gmail we have to provide some settings in Gmail
+	6. Logion gmail with "myaccount.gmail.com" or go to manage gmail account
+	7. Go to security
+	8. Enable 2-step verification
+	9. Then go to App passwords
+	   In that select custom name provide name "jenkins"
+	    Click on Generate
+	    It will provide key "aqnnwxhvohrhkqan" Save it for future reference
+8. Provide above key in password section
+
+9. Test mail configuration
+10. you will get mail notification
+We will get notification only when build failure
+If you want to get email notification once build success also follow below steps
+1. Manage jenkins
+2. Goto configure system
+3. Go to "srini.devops278@gmail.com"
+4. SMTP Server: "smtp.gmail.com"
+5. port: 465
+6. Go to advanced
+7. add gmail and password (zmveohmgfpqqrkrj)
+8. In default Content type: (How you want to see outout plain or HTML) HTML
+9. Default Recipients (To whom want to sent mail) seprate with , for multiple mail id
+10. reply list (srini.devops278@gmail.com)
+11. check the enable debug mode (to check the errors)
+12. Default triggers (when the email notification will get) (By default it will be available only for fail)
+	check the always
+	Check the success
+13. apply and save
+
+
+User Administration (OR) Role Based Authentication:
+===================================================
+If you add any user in jenkins he will get admin priviliges by default
+
+To implement that we have create roles (Add permissions)
+Add users into groups and provide role access
+
+Install plugin:
+Role-based authenticatipon strategy
+
+go to Manage jenkins
+Go to Manage pluins
+Go to Available plugins
+search for Role-based authenticatipon strategy
+Click on install without restart
+
+Go to Manage jenkins
+Go to Global Configure global security
+In security Relam: select Jenkins user database from dropdown menu
+In authorization: select role based strategy from drop down menu
+Click on apply and save
+
+Create Users:
+Go to manage jenkins
+Go to manage users
+Click on create user
+Provide user name, password, Full name, Email
+Click on create user
+
+Mange and Assign roles: (Create roles and assign rioles to groups)
+Go to manage jenkins
+Go to manage and assign roles
+Click on manage roles (By default admin Role is available)
+Provide role name and click on add
+In the Global roles section provide list of permissions for each role
+click on apply and save
+
+Assign roles:
+go to manage jenkins
+Go to manage and assign roles
+Click on Assign roles
+Under Global roles provide created user name and click on add
+In Global roles select role for each user
+
+
+
+Master Slave:
+===================
+Slave instance prerequisites:
+1. Launch new instance (slave)
+2. Connect slave instance via putty
+3. change to root user sudo su -
+4. $ apt-get update
+5. Create jenkins user
+	$ adduser jenkins
+	It will ask password provide password and click on enter
+6. Provide sudo priviliges to jenkins user
+	$ visudo
+	Go to user privilige specification 
+	add jenkins user
+	# User privilege specification
+	root    ALL=(ALL:ALL) ALL
+	jenkins ALL=(ALL:ALL)   NOPASSWD: ALL
+7. Go to ssh folder
+	root@ip-172-31-33-94:~# cd /etc/ssh/
+	open sshd_config file and enable pubkeyAuthentication yes and PasswordAuthentication yes
+	vi sshd_config
+	pubkeyAuthentication yes
+	PasswordAuthentication yes
+	Restart sshd
+	sudo systemctl restart sshd
+	sudo systemctl status sshd
+8. apt-get update
+
+9. Install java as per jenkins prerequisites
+ 	sudo apt install openjdk-11-jdk -y
+	Install maven for build the code
+	sudo apt-get install maven -y
+
+10. Create folder for jenkins workspace and provide permissions with jenkins user
+	sudo mkdir /var/lib/jenkins
+	chown -R jenkins:jenkins /var/lib/jenkins
+	chmod -R 775 /var/lib/jenkins
+
+11. check jenkins user
+	su - jenkins
+	exit from putty
+
+12. login with jenkins user from new putty session
+	open putty
+	provide ip address
+	No need to provide .PEM file
+	click on connect
+	provide username : jenkins
+	Password: Admin@123
+	It will connect without any PEM file
+
+
+Master node:
+1. Go to jenkins web page UI
+	http://43.205.238.209:8080/
+2. Go to Manage jenkins
+3. Click on Manage node and clouds
+4. Click on Built-in node(master node)
+5. Click on configure
+	No.of executers(How many jobs run parallelly) by default it is 2 (we can run 2 jobs parallelly)
+6. Add slave node:
+	click on new node
+	Provide node name (jenkins_slave)
+	Select perminent agent
+	Click on create
+	no.of executers by default 1  (keep the sane)
+	Remote directory(where our workspace created in slave server)
+		provide /var/lib/jenkins
+	Labels: this the name for added slave node. In script we have to provide label name only
+		jenkins_slave1
+	Usage: As much as usage (keep the same)
+	Launch method:
+		select "launch agent via ssh" from drop down menu
+		provide Ip address of slave (15.206.74.124)
+		credentials add jenkins user and password
+	Host key verification strategy
+		select non verifying verification strategy
+
+	Availability
+		keep this agent online as much as possible
+	click on save
+	After sometime click on refresh status
+
+Testing:
+1. Connect slave node
+	in /var/lib/jenkins folder remoting and remoting.jar files are created
+
+2. click on slave node in jenkins UI (Manage jenkins ---> Manage nodes and clouds)
+	Click on log
+	end of file it showing "Agent successfully connected and online"
+
+3. create freestyle projct
+	in General section, select "Restrict where this project can be run"
+	and provide lable name for slave node
+4. Pipeline script:
+	pipeline {
+    agent { label "jenkins_slave1" }
+    stages{
+        stage("git clone"){
+            steps{
+                git 'https://github.com/HARIDARUKUMALLI/java-tomcat-maven-example.git'
+            }
+        }
+    }
+}
+
+
+
+====================================================================================
+Run jenkins pipeline automatically once code check-in in github from developer
+====================================================================================
+In Jenkins UI:
+1. Go to manage jenkins
+2. Configure system
+3. Go to Github section
+4. Click on Advanced
+5. check the box "Specify another hook URL for GitHub configuration"
+6. It will show webhook URL, Copy the URL ("http://13.235.23.174:8080/github-webhook/")
+
+In GitHub UI:
+1. Open repository
+2. click on settings
+3. Click on webhooks
+5. IN payload URL, Provide jenkins webhook copied URl "http://13.235.23.174:8080/github-webhook/"
+6. content type "Application/json"
+7. Which events would you like to trigger this webhook?
+	select just the push event
+	(or) what u required
+8. Enable Active
+9. Click on add webhook
+
+Test:
+Go to jenkins
+open any project
+enable "GitHub hook trigger for GITScm polling" in Build triggers section
+write script
+then build once
+
+Now go to github repo
+make sonme changes and commit the changes
+go to jenkins job and refresh 
+build will be ran
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
